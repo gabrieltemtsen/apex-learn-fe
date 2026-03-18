@@ -1,11 +1,19 @@
 "use client";
 import { useState } from "react";
-import { Camera, Save, Loader2, CheckCircle, BookOpen, Trophy, Award, Flame } from "lucide-react";
+import { Camera, Save, Loader2, CheckCircle, BookOpen, Trophy, Award, Flame, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
-import api from "@/lib/api";
+import api, { authApi } from "@/lib/api";
 
 export default function ProfilePage() {
-  const { user, setUser } = useAuthStore();
+  const router = useRouter();
+  const { user, setUser, logout } = useAuthStore();
+
+  async function handleLogout() {
+    try { await authApi.logout(); } catch { /* ignore */ }
+    logout();
+    router.push("/");
+  }
   const [form, setForm] = useState({
     firstName: user?.firstName ?? "",
     lastName: user?.lastName ?? "",
@@ -59,6 +67,13 @@ export default function ProfilePage() {
           <p className="text-white font-bold text-lg">{form.firstName} {form.lastName}</p>
           <p className="text-slate-400 text-sm">{user?.email}</p>
           <span className="mt-1 inline-block text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 capitalize">{user?.role ?? "learner"}</span>
+        </div>
+        <button onClick={handleLogout}
+          className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl border border-red-500/30 bg-red-900/20 text-red-400 hover:bg-red-900/40 text-sm font-semibold transition-all shrink-0">
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Sign Out</span>
+        </button>
+        <div className="hidden">
         </div>
       </div>
 
