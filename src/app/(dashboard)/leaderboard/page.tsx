@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Trophy, Medal, Star, Flame, BookOpen, CheckCircle } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 
 const MOCK_ENTRIES = [
   { rank: 1, name: "Amaka Osei", avatar: "AO", points: 12480, coursesCompleted: 18, assessmentsPassed: 34, streak: 42, badge: "🏆" },
@@ -26,9 +26,7 @@ export default function LeaderboardPage() {
   const rest = MOCK_ENTRIES.slice(3);
 
   return (
-    <div className="min-h-screen bg-[#0f172a]">
-      <Navbar />
-      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <div className="pb-20 lg:pb-0">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm font-semibold mb-4">
             <Trophy className="w-4 h-4" /> Championship League
@@ -107,7 +105,6 @@ export default function LeaderboardPage() {
             ))}
           </div>
         </div>
-      </div>
     </div>
   );
 }

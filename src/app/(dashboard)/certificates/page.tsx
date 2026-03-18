@@ -9,9 +9,7 @@ const MOCK_CERTS = [
 
 export default function CertificatesPage() {
   return (
-    <div className="min-h-screen bg-[#0f172a]">
-      <Navbar />
-      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+    <div className="pb-20 lg:pb-0">
         <div className="mb-10">
           <h1 className="text-4xl font-extrabold text-white mb-3">My Certificates</h1>
           <p className="text-slate-400">Your earned certificates — QR-verified and ready for sharing.</p>
@@ -80,6 +78,5 @@ export default function CertificatesPage() {
           <p className="text-slate-400 text-sm">All ApexLearn certificates are QR-verified. Employers and institutions can scan the QR code or visit <span className="text-indigo-400">verify.apexlearn.ng/[certificate-number]</span> to instantly confirm authenticity.</p>
         </div>
       </div>
-    </div>
   );
 }
