@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; // kept for logout redirect
 import {
   BookOpen, Trophy, Flame, Award, ChevronRight,
   LayoutDashboard, GraduationCap, BarChart2, User, LogOut,
@@ -65,10 +65,8 @@ export default function DashboardPage() {
   const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-    }
+    // Auth guard is handled by (dashboard)/layout.tsx via AuthGuard component.
+    // No redirect needed here.
     (async () => {
       try {
         const data = await enrollmentsApi.myEnrollments();
@@ -80,7 +78,7 @@ export default function DashboardPage() {
         setLoading(false);
       }
     })();
-  }, [isAuthenticated, router]);
+  }, []);
 
   const handleLogout = async () => {
     try { await authApi.logout(); } catch { /* ignore */ }

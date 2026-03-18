@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 import { authApi } from "@/lib/api";
+import AuthGuard from "@/components/AuthGuard";
 import {
   LayoutDashboard, BookOpen, Compass, Trophy, Award,
   User, Settings, LogOut, GraduationCap, Menu, X,
@@ -83,6 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
+    <AuthGuard>
     <div className="min-h-screen bg-[#0f172a] flex">
 
       {/* ── Desktop Sidebar ── */}
@@ -187,5 +189,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </nav>
     </div>
+    </AuthGuard>
   );
 }

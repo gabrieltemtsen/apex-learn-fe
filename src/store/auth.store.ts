@@ -19,10 +19,12 @@ interface AuthStore {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  _hasHydrated: boolean;
   login: (user: User, accessToken: string, refreshToken: string) => void;
   logout: () => void;
   setUser: (user: User) => void;
   setLoading: (v: boolean) => void;
+  setHasHydrated: (v: boolean) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -33,12 +35,14 @@ export const useAuthStore = create<AuthStore>()(
       refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
+      _hasHydrated: false,
       login: (user, accessToken, refreshToken) =>
         set({ user, accessToken, refreshToken, isAuthenticated: true }),
       logout: () =>
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false }),
       setUser: (user) => set({ user }),
       setLoading: (isLoading) => set({ isLoading }),
+      setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
     {
       name: 'apexlearn-auth',
@@ -49,6 +53,9 @@ export const useAuthStore = create<AuthStore>()(
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
