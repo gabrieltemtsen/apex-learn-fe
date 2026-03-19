@@ -88,6 +88,26 @@ export const progressApi = {
     api.get(`/progress/course/${courseId}`).then(r => r.data),
 };
 
+export const assessmentsApi = {
+  getByCourse: (courseId: string) =>
+    api.get(`/assessments/course/${courseId}`).then(r => r.data),
+  get: (id: string) =>
+    api.get(`/assessments/${id}`).then(r => r.data),
+  submit: (id: string, answers: Record<string, string>, timeTakenSeconds: number) =>
+    api.post(`/assessments/${id}/attempt`, { answers, timeTakenSeconds }).then(r => r.data),
+  results: (id: string) =>
+    api.get(`/assessments/${id}/results`).then(r => r.data),
+};
+
+export const adminApi = {
+  users: (params?: { tenantId?: string }) =>
+    api.get('/users', { params }).then(r => r.data),
+  promoteUser: (userId: string, role: string) =>
+    api.patch(`/users/${userId}/role`, { role }).then(r => r.data),
+  deleteUser: (userId: string) =>
+    api.delete(`/users/${userId}`).then(r => r.data),
+};
+
 export const certificatesApi = {
   mine: () => api.get('/certificates/my').then(r => r.data),
   generate: (courseId: string, tenantId: string) =>

@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
-import { Users, BookOpen, TrendingUp, DollarSign, Plus, Eye, Pencil, Trash2, CheckCircle, XCircle, Award } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, BookOpen, TrendingUp, DollarSign, Plus, Eye, Pencil, Trash2, CheckCircle, XCircle, Award, Loader2, ShieldCheck, RefreshCw } from "lucide-react";
+import { adminApi } from "@/lib/api";
+import { TableRowSkeleton } from "@/components/Skeleton";
 
 const STATS = [
   { label: "Total Learners", value: "12,450", change: "+8.2%", up: true, icon: Users, color: "from-indigo-500 to-violet-500" },
@@ -28,9 +30,67 @@ const USERS = [
 
 type TabId = "courses" | "users" | "analytics";
 
+interface RealUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  points?: number;
+}
+
+const ROLE_OPTIONS = ["learner", "facilitator", "admin", "tenant_admin", "super_admin"];
+const ROLE_COLORS: Record<string, string> = {
+  learner: "bg-slate-700 text-slate-300",
+  facilitator: "bg-blue-500/20 text-blue-400 border border-blue-500/30",
+  admin: "bg-purple-500/20 text-purple-400 border border-purple-500/30",
+  tenant_admin: "bg-orange-500/20 text-orange-400 border border-orange-500/30",
+  super_admin: "bg-red-500/20 text-red-400 border border-red-500/30",
+};
+
 export default function AdminPage() {
   const [tab, setTab] = useState<TabId>("courses");
   const [courses, setCourses] = useState(COURSES);
+
+  // Real users state
+  const [users, setUsers] = useState<RealUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersLoaded, setUsersLoaded] = useState(false);
+  const [promotingId, setPromotingId] = useState<string | null>(null);
+  const [promoteError, setPromoteError] = useState("");
+
+  async function loadUsers() {
+    setUsersLoading(true);
+    setPromoteError("");
+    try {
+      const data = await adminApi.users();
+      setUsers(Array.isArray(data) ? data : data.users ?? []);
+      setUsersLoaded(true);
+    } catch {
+      setPromoteError("Failed to load users. Make sure you have admin access.");
+    } finally {
+      setUsersLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (tab === "users" && !usersLoaded) loadUsers();
+  }, [tab]);
+
+  async function handlePromote(userId: string, role: string) {
+    setPromotingId(userId);
+    setPromoteError("");
+    try {
+      await adminApi.promoteUser(userId, role);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u));
+    } catch {
+      setPromoteError("Failed to change role. Only super admins can assign super_admin.");
+    } finally {
+      setPromotingId(null);
+    }
+  }
 
   function togglePublish(id: string) {
     setCourses(prev => prev.map(c =>
@@ -130,39 +190,118 @@ export default function AdminPage() {
 
       {/* Users Tab */}
       {tab === "users" && (
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden">
-          <div className="p-5 border-b border-slate-700 flex items-center justify-between">
-            <h2 className="text-white font-bold">All Users</h2>
-            <span className="text-slate-500 text-sm">{USERS.length} total</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-slate-700 bg-slate-800/80">
-                <tr>
-                  {["Name", "Email", "Role", "Enrollments", "Joined"].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-700/50">
-                {USERS.map(u => (
-                  <tr key={u.id} className="hover:bg-slate-700/30 transition-colors">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-600/30 flex items-center justify-center text-indigo-400 text-sm font-bold shrink-0">{u.name[0]}</div>
-                        <p className="text-white font-semibold text-sm">{u.name}</p>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-slate-400 text-sm">{u.email}</td>
-                    <td className="px-5 py-4">
-                      <span className={`text-xs px-2 py-1 rounded-full font-semibold capitalize ${u.role === "admin" ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "bg-slate-700 text-slate-300"}`}>{u.role}</span>
-                    </td>
-                    <td className="px-5 py-4 text-slate-300 text-sm">{u.enrollments}</td>
-                    <td className="px-5 py-4 text-slate-500 text-sm">{u.joined}</td>
+        <div className="space-y-4">
+          {promoteError && (
+            <div className="px-4 py-3 rounded-xl bg-red-900/30 border border-red-500/30 text-red-400 text-sm flex items-center justify-between">
+              {promoteError}
+              <button onClick={() => setPromoteError("")} className="text-red-400 hover:text-red-300 ml-2">✕</button>
+            </div>
+          )}
+
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden">
+            <div className="p-5 border-b border-slate-700 flex items-center justify-between">
+              <div>
+                <h2 className="text-white font-bold flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-indigo-400" /> User Management
+                </h2>
+                <p className="text-slate-500 text-xs mt-0.5">Change roles to grant/revoke admin access</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-slate-500 text-sm">{users.length} users</span>
+                <button onClick={loadUsers} disabled={usersLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 hover:text-white text-xs transition-colors disabled:opacity-50">
+                  <RefreshCw className={`w-3 h-3 ${usersLoading ? "animate-spin" : ""}`} /> Refresh
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-slate-700 bg-slate-800/80">
+                  <tr>
+                    {["User", "Email", "Role", "Points", "Joined", "Actions"].map(h => (
+                      <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wide">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-700/50">
+                  {usersLoading
+                    ? Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i}><td colSpan={6} className="px-2 py-1"><TableRowSkeleton cols={6} /></td></tr>
+                    ))
+                    : users.map(u => (
+                      <tr key={u.id} className="hover:bg-slate-700/30 transition-colors">
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-indigo-600/30 flex items-center justify-center text-indigo-400 text-sm font-bold shrink-0">
+                              {u.firstName[0]}
+                            </div>
+                            <div>
+                              <p className="text-white font-semibold text-sm">{u.firstName} {u.lastName}</p>
+                              <span className={`text-xs ${u.isActive ? "text-emerald-500" : "text-red-500"}`}>
+                                {u.isActive ? "Active" : "Inactive"}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-slate-400 text-sm">{u.email}</td>
+                        <td className="px-5 py-4">
+                          <span className={`text-xs px-2 py-1 rounded-full font-semibold capitalize ${ROLE_COLORS[u.role] ?? "bg-slate-700 text-slate-300"}`}>
+                            {u.role.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-slate-300 text-sm">{(u.points ?? 0).toLocaleString()}</td>
+                        <td className="px-5 py-4 text-slate-500 text-sm">
+                          {new Date(u.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2">
+                            {promotingId === u.id
+                              ? <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                              : (
+                                <select
+                                  value={u.role}
+                                  onChange={e => handlePromote(u.id, e.target.value)}
+                                  className="text-xs bg-slate-700 border border-slate-600 text-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                >
+                                  {ROLE_OPTIONS.map(r => (
+                                    <option key={r} value={r}>{r.replace("_", " ")}</option>
+                                  ))}
+                                </select>
+                              )
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  }
+                  {!usersLoading && users.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-5 py-12 text-center text-slate-500 text-sm">
+                        No users found. Make sure you&apos;re logged in as admin.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* How to create first admin */}
+          <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-5">
+            <h3 className="text-white font-bold mb-2 flex items-center gap-2 text-sm">
+              <ShieldCheck className="w-4 h-4 text-indigo-400" /> First-time Admin Setup
+            </h3>
+            <p className="text-slate-400 text-xs leading-relaxed">
+              To create the first super admin, call{" "}
+              <code className="bg-slate-900 text-indigo-400 px-1.5 py-0.5 rounded text-xs">
+                POST /auth/seed-admin
+              </code>{" "}
+              with <code className="bg-slate-900 text-indigo-400 px-1.5 py-0.5 rounded text-xs">secret</code>,{" "}
+              <code className="bg-slate-900 text-indigo-400 px-1.5 py-0.5 rounded text-xs">email</code>, and{" "}
+              <code className="bg-slate-900 text-indigo-400 px-1.5 py-0.5 rounded text-xs">password</code>.{" "}
+              Set <code className="bg-slate-900 text-indigo-400 px-1.5 py-0.5 rounded text-xs">ADMIN_SEED_SECRET</code> in Railway env vars.
+              Once you&apos;re a super admin, use the role dropdown above to promote other users.
+            </p>
           </div>
         </div>
       )}
