@@ -18,8 +18,8 @@ export default function InstructorPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Instructor Studio</h1>
-          <p className="text-slate-400 mt-1">Create and manage your courses</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Course Studio</h1>
+          <p className="text-slate-400 mt-1">Create and manage platform courses</p>
         </div>
         <button onClick={() => { setShowModal(true); setStep("details"); }}
           className="flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all">
