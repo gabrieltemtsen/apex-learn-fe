@@ -68,10 +68,30 @@ export const authApi = {
 };
 
 export const coursesApi = {
-  list: (params?: { category?: string; level?: string; search?: string }) =>
+  list: (params?: { category?: string; level?: string; search?: string; isPublished?: boolean }) =>
     api.get('/courses', { params }).then(r => r.data),
   get: (id: string) => api.get(`/courses/${id}`).then(r => r.data),
   getBySlug: (slug: string) => api.get(`/courses/slug/${slug}`).then(r => r.data),
+  mine: () => api.get('/courses/mine').then(r => r.data),
+  create: (data: {
+    title: string; description: string; tenantId?: string;
+    category?: string; level?: string; durationHours?: number; thumbnailUrl?: string; tags?: string;
+  }) => api.post('/courses', data).then(r => r.data),
+  update: (id: string, data: object) => api.patch(`/courses/${id}`, data).then(r => r.data),
+  publish: (id: string) => api.post(`/courses/${id}/publish`).then(r => r.data),
+  remove: (id: string) => api.delete(`/courses/${id}`).then(r => r.data),
+};
+
+export const lessonsApi = {
+  getByCourse: (courseId: string) =>
+    api.get(`/lessons/course/${courseId}`).then(r => r.data),
+  get: (id: string) => api.get(`/lessons/${id}`).then(r => r.data),
+  create: (data: {
+    courseId: string; title: string; description?: string;
+    type?: string; videoUrl?: string; content?: string; durationSeconds?: number; order?: number; isFree?: boolean;
+  }) => api.post('/lessons', data).then(r => r.data),
+  update: (id: string, data: object) => api.patch(`/lessons/${id}`, data).then(r => r.data),
+  remove: (id: string) => api.delete(`/lessons/${id}`).then(r => r.data),
 };
 
 export const enrollmentsApi = {
