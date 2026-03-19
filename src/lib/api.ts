@@ -87,3 +87,13 @@ export const progressApi = {
   getCourseProgress: (courseId: string) =>
     api.get(`/progress/course/${courseId}`).then(r => r.data),
 };
+
+export const certificatesApi = {
+  mine: () => api.get('/certificates/my').then(r => r.data),
+  generate: (courseId: string, tenantId: string) =>
+    api.post(`/certificates/generate/${courseId}`, { tenantId }).then(r => r.data),
+  verify: (certNumber: string) =>
+    api.get(`/certificates/verify/${certNumber}`).then(r => r.data),
+  downloadUrl: (certNumber: string) =>
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/certificates/download/${certNumber}`,
+};

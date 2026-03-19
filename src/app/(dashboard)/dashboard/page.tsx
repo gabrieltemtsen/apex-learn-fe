@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
 import { enrollmentsApi } from "@/lib/api";
+import { StatCardSkeleton, CourseCardSkeleton } from "@/components/Skeleton";
 
 interface Enrollment {
   id: string;
@@ -86,17 +87,20 @@ export default function DashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-2">
-            <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center`}>
-              <Icon className={`w-5 h-5 ${color}`}/>
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          : stats.map(({ label, value, icon: Icon, color, bg }) => (
+            <div key={label} className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-2">
+              <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center`}>
+                <Icon className={`w-5 h-5 ${color}`}/>
+              </div>
+              <div>
+                <p className="text-2xl font-extrabold text-white">{value}</p>
+                <p className="text-slate-400 text-xs">{label}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-extrabold text-white">{value}</p>
-              <p className="text-slate-400 text-xs">{label}</p>
-            </div>
-          </div>
-        ))}
+          ))
+        }
       </div>
 
       {/* Continue Learning */}
@@ -109,7 +113,17 @@ export default function DashboardPage() {
         </div>
         {loading ? (
           <div className="space-y-3">
-            {[1,2].map(i => <div key={i} className="h-24 bg-slate-800/60 rounded-2xl animate-pulse"/>)}
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-slate-700/50 animate-pulse shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-slate-700/50 rounded animate-pulse w-2/3" />
+                  <div className="h-3 bg-slate-700/50 rounded animate-pulse w-1/3" />
+                  <div className="h-1.5 bg-slate-700/50 rounded-full animate-pulse w-full" />
+                </div>
+                <div className="w-9 h-9 rounded-xl bg-slate-700/50 animate-pulse shrink-0" />
+              </div>
+            ))}
           </div>
         ) : enrollments.length === 0 ? (
           <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-8 text-center">
