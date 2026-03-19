@@ -56,7 +56,7 @@ export default function ExplorePage() {
     if (!isAuthenticated) return;
     setEnrolling(courseId);
     try {
-      await enrollmentsApi.enroll(courseId, "default");
+      await enrollmentsApi.enroll(courseId);
       setEnrolledIds(prev => [...prev, courseId]);
     } catch { /* ignore */ }
     finally { setEnrolling(null); }

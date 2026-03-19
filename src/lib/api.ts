@@ -53,7 +53,7 @@ export default api;
 
 // Auth API helpers
 export const authApi = {
-  register: (data: { firstName: string; lastName: string; email: string; password: string; tenantId?: string }) =>
+  register: (data: { firstName: string; lastName: string; email: string; password: string; role?: string }) =>
     api.post('/auth/register', data).then(r => r.data),
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }).then(r => r.data),
@@ -64,15 +64,15 @@ export const authApi = {
 };
 
 export const coursesApi = {
-  list: (params?: { category?: string; level?: string; search?: string; tenantId?: string }) =>
+  list: (params?: { category?: string; level?: string; search?: string }) =>
     api.get('/courses', { params }).then(r => r.data),
   get: (id: string) => api.get(`/courses/${id}`).then(r => r.data),
   getBySlug: (slug: string) => api.get(`/courses/slug/${slug}`).then(r => r.data),
 };
 
 export const enrollmentsApi = {
-  enroll: (courseId: string, tenantId: string) =>
-    api.post('/enrollments', { courseId, tenantId }).then(r => r.data),
+  enroll: (courseId: string) =>
+    api.post('/enrollments', { courseId }).then(r => r.data),
   myEnrollments: () => api.get('/enrollments/my').then(r => r.data),
   drop: (enrollmentId: string) => api.delete(`/enrollments/${enrollmentId}`).then(r => r.data),
 };

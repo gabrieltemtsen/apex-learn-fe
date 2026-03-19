@@ -23,7 +23,7 @@ const NAV_LINKS = [
 
 const ADMIN_LINKS = [
   { href: "/admin",      label: "Admin Panel",      icon: BarChart3 },
-  { href: "/instructor", label: "Instructor Studio", icon: Zap },
+  { href: "/instructor", label: "Course Studio",    icon: Zap },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -39,8 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() : "?";
-  const isAdmin = user?.role === "admin" || user?.role === "tenant_admin" || user?.role === "super_admin";
-  const isInstructor = isAdmin || user?.role === "facilitator";
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
     return (
@@ -61,12 +60,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           );
         })}
 
-        {(isAdmin || isInstructor) && (
+        {isAdmin && (
           <>
             <div className="pt-4 pb-2 px-3">
-              <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest">Management</p>
+              <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest">Admin</p>
             </div>
-            {ADMIN_LINKS.filter(l => isAdmin || l.href === "/instructor").map(({ href, label, icon: Icon }) => {
+            {ADMIN_LINKS.map(({ href, label, icon: Icon }) => {
               const active = pathname.startsWith(href);
               return (
                 <Link key={href} href={href} onClick={onNavigate}
@@ -163,7 +162,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full">
           {children}
         </main>
       </div>

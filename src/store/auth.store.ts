@@ -7,7 +7,6 @@ interface User {
   lastName: string;
   email: string;
   role: string;
-  tenantId?: string;
   avatarUrl?: string;
   points?: number;
   streak?: number;
