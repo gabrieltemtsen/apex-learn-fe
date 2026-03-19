@@ -4,10 +4,12 @@ import { Camera, Save, Loader2, CheckCircle, BookOpen, Trophy, Award, Flame, Log
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 import api, { authApi } from "@/lib/api";
+import { useToast } from "@/contexts/toast";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, setUser, logout } = useAuthStore();
+  const { success, error: toastError } = useToast();
 
   async function handleLogout() {
     try { await authApi.logout(); } catch { /* ignore */ }
@@ -33,9 +35,12 @@ export default function ProfilePage() {
       const { data } = await api.patch(`/users/${user?.id}`, form);
       setUser({ ...user!, ...data });
       setSaved(true);
+      success("Profile updated successfully!");
       setTimeout(() => setSaved(false), 2500);
     } catch (err: any) {
-      setError(err.response?.data?.message ?? "Failed to update profile");
+      const msg = err.response?.data?.message ?? "Failed to update profile";
+      setError(msg);
+      toastError(msg);
     } finally { setSaving(false); }
   }
 

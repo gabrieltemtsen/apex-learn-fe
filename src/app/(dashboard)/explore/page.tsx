@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search, Star, Users, Clock, BookOpen, X, Filter } from "lucide-react";
 import { coursesApi, enrollmentsApi } from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
+import { useToast } from "@/contexts/toast";
 
 const MOCK_COURSES = [
   { id: "1", slug: "ai-fundamentals", title: "AI Fundamentals for Public Servants", instructor: "Dr. Amaka Obi", category: "Artificial Intelligence", level: "beginner", durationHours: 12, enrollmentCount: 1240, averageRating: 4.8, reviewCount: 328, gradient: "from-violet-600 to-indigo-600" },
@@ -27,6 +28,7 @@ const LEVEL_COLORS: Record<string, string> = {
 
 export default function ExplorePage() {
   const { isAuthenticated } = useAuthStore();
+  const { success, error: toastError } = useToast();
   const [courses, setCourses] = useState(MOCK_COURSES);
   const [enrolledIds, setEnrolledIds] = useState<string[]>([]);
   const [enrolling, setEnrolling] = useState<string | null>(null);
@@ -58,8 +60,15 @@ export default function ExplorePage() {
     try {
       await enrollmentsApi.enroll(courseId);
       setEnrolledIds(prev => [...prev, courseId]);
-    } catch { /* ignore */ }
-    finally { setEnrolling(null); }
+      success("Enrolled successfully! Check My Courses to start learning.");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      if (msg?.includes("already enrolled")) {
+        toastError("You're already enrolled in this course.");
+      } else {
+        toastError("Enrollment failed. Please try again.");
+      }
+    } finally { setEnrolling(null); }
   }
 
   return (

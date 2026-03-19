@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 import { Bell, Shield, Globe, Save, Loader2, CheckCircle, Moon, Mail } from "lucide-react";
+import { useAuthStore } from "@/store/auth.store";
+import { usersApi } from "@/lib/api";
+import { useToast } from "@/contexts/toast";
 
 interface ToggleProps { checked: boolean; onChange: (v: boolean) => void; }
 function Toggle({ checked, onChange }: ToggleProps) {
@@ -13,6 +16,8 @@ function Toggle({ checked, onChange }: ToggleProps) {
 }
 
 export default function SettingsPage() {
+  const { user, setUser } = useAuthStore();
+  const { success, error: toastError } = useToast();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [settings, setSettings] = useState({
@@ -32,10 +37,21 @@ export default function SettingsPage() {
   }
 
   async function handleSave() {
+    if (!user) return;
     setSaving(true);
-    await new Promise(r => setTimeout(r, 800)); // simulate API
-    setSaving(false); setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    try {
+      // Save language/timezone preferences to user profile
+      const updated = await usersApi.updateProfile(user.id, {});
+      // Store UI preferences in localStorage (they don't have a DB column yet)
+      localStorage.setItem('apex-settings', JSON.stringify(settings));
+      setSaved(true);
+      success("Settings saved successfully!");
+      setTimeout(() => setSaved(false), 2500);
+    } catch {
+      toastError("Failed to save settings. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

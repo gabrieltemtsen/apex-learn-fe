@@ -88,6 +88,19 @@ export const progressApi = {
     api.get(`/progress/course/${courseId}`).then(r => r.data),
 };
 
+export const leaderboardApi = {
+  top: (limit?: number) =>
+    api.get('/leaderboard/top', { params: limit ? { limit } : {} }).then(r => r.data),
+  byTenant: (tenantId: string, period?: string) =>
+    api.get(`/leaderboard/${tenantId}`, { params: period ? { period } : {} }).then(r => r.data),
+};
+
+export const usersApi = {
+  updateProfile: (userId: string, data: { firstName?: string; lastName?: string; bio?: string; jobTitle?: string }) =>
+    api.patch(`/users/${userId}`, data).then(r => r.data),
+  me: () => api.get('/users/me/profile').then(r => r.data),
+};
+
 export const assessmentsApi = {
   getByCourse: (courseId: string) =>
     api.get(`/assessments/course/${courseId}`).then(r => r.data),
