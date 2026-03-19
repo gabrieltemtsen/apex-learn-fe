@@ -95,8 +95,8 @@ export const lessonsApi = {
 };
 
 export const enrollmentsApi = {
-  enroll: (courseId: string) =>
-    api.post('/enrollments', { courseId }).then(r => r.data),
+  enroll: (courseId: string, tenantId?: string) =>
+    api.post('/enrollments', { courseId, ...(tenantId ? { tenantId } : {}) }).then(r => r.data),
   myEnrollments: () => api.get('/enrollments/my').then(r => r.data),
   drop: (enrollmentId: string) => api.delete(`/enrollments/${enrollmentId}`).then(r => r.data),
 };
@@ -106,6 +106,11 @@ export const progressApi = {
     api.post('/progress', { lessonId, courseId }).then(r => r.data),
   getCourseProgress: (courseId: string) =>
     api.get(`/progress/course/${courseId}`).then(r => r.data),
+};
+
+export const tenantsApi = {
+  getDefault: () => api.get('/tenants/default').then(r => r.data as { id: string }),
+  list: () => api.get('/tenants').then(r => r.data),
 };
 
 export const leaderboardApi = {
