@@ -47,6 +47,18 @@ function LoginForm() {
           </div>
 
           <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 sm:p-8 space-y-5">
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/google`}
+              className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-900/70 border border-slate-700 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+            >
+              Continue with Google
+            </a>
+
+            <div className="flex items-center gap-3">
+              <div className="h-px bg-slate-700 flex-1" />
+              <span className="text-slate-500 text-xs">OR</span>
+              <div className="h-px bg-slate-700 flex-1" />
+            </div>
             {error && (
               <div className="px-4 py-3 rounded-xl bg-red-900/30 border border-red-500/30 text-red-400 text-sm">{error}</div>
             )}

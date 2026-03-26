@@ -10,6 +10,16 @@ interface User {
   avatarUrl?: string;
   points?: number;
   streak?: number;
+
+  // NRSA identity fields (optional on client; populated as backend sync is added)
+  irNumber?: string | null;
+  department?: string | null;
+  roleGrade?: string | null;
+  managerIrNumber?: string | null;
+  locationCity?: string | null;
+  locationBranch?: string | null;
+  locationOutstation?: string | null;
+  ageGroup?: string | null;
 }
 
 interface AuthStore {
