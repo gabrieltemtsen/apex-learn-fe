@@ -40,6 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() : "?";
+  const displayName = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "Account" : "Account";
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
@@ -106,7 +107,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-semibold truncate">{user?.firstName} {user?.lastName}</p>
+              <p className="text-white text-sm font-semibold truncate">{displayName}</p>
               <p className="text-slate-500 text-xs capitalize truncate">{user?.role ?? "learner"}</p>
             </div>
             <button onClick={handleLogout} title="Logout"
@@ -138,7 +139,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="flex items-center gap-3 px-3 py-2">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-sm font-bold">{initials}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-semibold truncate">{user?.firstName} {user?.lastName}</p>
+                  <p className="text-white text-sm font-semibold truncate">{displayName}</p>
                   <p className="text-slate-500 text-xs capitalize">{user?.role ?? "learner"}</p>
                 </div>
                 <button onClick={handleLogout} className="p-1.5 rounded-lg text-slate-500 hover:text-red-400"><LogOut className="w-4 h-4" /></button>

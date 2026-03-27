@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { registerAccessTokenGetter } from "@/lib/auth0-token";
 import { useAuthStore } from "@/store/auth.store";
-import { usersApi } from "@/lib/api";
+import axios from "axios";
 
 /**
  * Bridges Auth0 SDK state into our local Zustand store (for legacy UI code)
@@ -45,10 +45,15 @@ export default function Auth0Sync() {
     }
 
     // Fetch the real user profile from backend (role/tenant/etc)
+    // Do it with an explicit token header to avoid timing/race issues.
     let cancelled = false;
     (async () => {
       try {
-        const me = await usersApi.me();
+        const token = await getAccessTokenSilently();
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+        const { data: me } = await axios.get(`${baseUrl}/users/me/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (!cancelled) setUser(me);
       } catch {
         // If profile fetch fails, keep Auth0 session but clear local user
@@ -59,7 +64,7 @@ export default function Auth0Sync() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, setUser]);
+  }, [isAuthenticated, setUser, getAccessTokenSilently]);
 
   return null;
 }
