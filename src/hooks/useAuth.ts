@@ -1,65 +1,45 @@
-'use client';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth.store';
-import api from '@/lib/api';
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useAuthStore } from "@/store/auth.store";
 
 export function useAuth() {
-  const store = useAuthStore();
   const router = useRouter();
+  const store = useAuthStore();
+  const { isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
 
   const requireAuth = () => {
-    if (!store.isAuthenticated) {
-      router.push('/login');
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
     }
   };
 
   const requireRole = (roles: string[]) => {
-    if (!store.isAuthenticated) {
-      router.push('/login');
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
       return false;
     }
     if (!store.user || !roles.includes(store.user.role)) {
-      router.push('/dashboard');
+      router.push("/dashboard");
       return false;
     }
     return true;
   };
 
-  const loginWithCredentials = async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
-    const { user, accessToken, refreshToken } = response.data;
-    store.login(user, accessToken, refreshToken);
-    return user;
-  };
-
-  const register = async (data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    tenantId?: string;
-  }) => {
-    const response = await api.post('/auth/register', data);
-    const { user, accessToken, refreshToken } = response.data;
-    store.login(user, accessToken, refreshToken);
-    return user;
-  };
-
-  const logout = async () => {
-    try {
-      await api.post('/auth/logout');
-    } catch {}
-    store.logout();
-    router.push('/');
+  const logoutApp = async () => {
+    store.logoutLocal();
+    await logout({ logoutParams: { returnTo: window.location.origin } });
+    router.push("/");
   };
 
   return {
     ...store,
+    isAuthenticated,
+    isLoading,
     requireAuth,
     requireRole,
-    loginWithCredentials,
-    register,
-    logout,
+    loginWithRedirect,
+    logout: logoutApp,
   };
 }

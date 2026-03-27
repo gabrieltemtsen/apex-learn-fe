@@ -1,21 +1,17 @@
 import axios from 'axios';
+import { getAccessToken } from './auth0-token';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   headers: { 'Content-Type': 'application/json' },
 });
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   if (typeof window !== 'undefined') {
-    try {
-      const stored = localStorage.getItem('apexlearn-auth');
-      if (stored) {
-        const { state } = JSON.parse(stored);
-        if (state?.accessToken) {
-          config.headers.Authorization = `Bearer ${state.accessToken}`;
-        }
-      }
-    } catch { /* ignore */ }
+    const token = await getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
@@ -23,27 +19,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    if (error.response?.status === 401) {
-      try {
-        const stored = localStorage.getItem('apexlearn-auth');
-        if (stored) {
-          const { state } = JSON.parse(stored);
-          if (state?.refreshToken) {
-            const { data } = await axios.post(
-              `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/refresh`,
-              { refreshToken: state.refreshToken }
-            );
-            // Update stored token
-            const updated = { ...JSON.parse(stored), state: { ...state, accessToken: data.accessToken, refreshToken: data.refreshToken } };
-            localStorage.setItem('apexlearn-auth', JSON.stringify(updated));
-            error.config.headers.Authorization = `Bearer ${data.accessToken}`;
-            return api.request(error.config);
-          }
-        }
-      } catch {
-        localStorage.removeItem('apexlearn-auth');
-        window.location.href = '/login';
-      }
+    // With Auth0, token refresh is handled by the SDK.
+    // If we still get a 401, send user to login.
+    if (typeof window !== 'undefined' && error.response?.status === 401) {
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

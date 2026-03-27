@@ -3,17 +3,19 @@ import { useState } from "react";
 import { Camera, Save, Loader2, CheckCircle, BookOpen, Trophy, Award, Flame, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
-import api, { authApi } from "@/lib/api";
+import { useAuth0 } from "@auth0/auth0-react";
+import api from "@/lib/api";
 import { useToast } from "@/contexts/toast";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, setUser, logout } = useAuthStore();
+  const { user, setUser, logoutLocal } = useAuthStore();
+  const { logout } = useAuth0();
   const { success, error: toastError } = useToast();
 
   async function handleLogout() {
-    try { await authApi.logout(); } catch { /* ignore */ }
-    logout();
+    logoutLocal();
+    await logout({ logoutParams: { returnTo: window.location.origin } });
     router.push("/");
   }
   const [form, setForm] = useState({
