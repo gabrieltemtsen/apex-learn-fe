@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { registerAccessTokenGetter } from "@/lib/auth0-token";
 import { useAuthStore } from "@/store/auth.store";
@@ -19,7 +19,7 @@ export default function Auth0Sync() {
   // Ensure we only register once
   const registeredRef = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (registeredRef.current) return;
     registeredRef.current = true;
 

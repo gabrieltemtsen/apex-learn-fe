@@ -19,11 +19,8 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    // With Auth0, token refresh is handled by the SDK.
-    // If we still get a 401, send user to login.
-    if (typeof window !== 'undefined' && error.response?.status === 401) {
-      window.location.href = '/login';
-    }
+    // With Auth0, avoid hard-redirect loops.
+    // Let route guards handle navigation; consumers can handle 401s if needed.
     return Promise.reject(error);
   }
 );
