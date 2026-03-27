@@ -12,6 +12,7 @@ import axios from "axios";
  */
 export default function Auth0Sync() {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const audience = process.env.NEXT_PUBLIC_AUTH0_AUDIENCE;
   const setSession = useAuthStore((s) => s.setSession);
   const setUser = useAuthStore((s) => s.setUser);
   const setStoreLoading = useAuthStore((s) => s.setLoading);
@@ -25,7 +26,9 @@ export default function Auth0Sync() {
 
     registerAccessTokenGetter(async () => {
       try {
-        return await getAccessTokenSilently();
+        return await getAccessTokenSilently({
+          authorizationParams: audience ? { audience } : undefined,
+        });
       } catch {
         return null;
       }
@@ -49,7 +52,9 @@ export default function Auth0Sync() {
     let cancelled = false;
     (async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently({
+          authorizationParams: audience ? { audience } : undefined,
+        });
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
         const { data: me } = await axios.get(`${baseUrl}/users/me/profile`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -64,7 +69,7 @@ export default function Auth0Sync() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, setUser, getAccessTokenSilently]);
+  }, [isAuthenticated, setUser, getAccessTokenSilently, audience]);
 
   return null;
 }
