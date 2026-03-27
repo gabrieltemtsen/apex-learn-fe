@@ -48,6 +48,7 @@ export default function Navbar() {
   };
 
   const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() : "?";
+  const displayName = user ? (user.firstName || user.email || "Account") : "Account";
 
   return (
     <>
@@ -82,7 +83,7 @@ export default function Navbar() {
                     <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold">
                       {initials}
                     </div>
-                    <span className="text-sm font-medium max-w-[120px] truncate">{user.firstName}</span>
+                    <span className="text-sm font-medium max-w-[120px] truncate">{displayName}</span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
                   </button>
                   {userMenuOpen && (
