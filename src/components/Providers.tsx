@@ -5,8 +5,10 @@ import { useState } from "react";
 import { ToastProvider } from "@/contexts/toast";
 import { Auth0Provider } from "@auth0/auth0-react";
 import Auth0Sync from "@/components/auth/Auth0Sync";
+import { useRouter } from "next/navigation";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -28,6 +30,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <Auth0Provider
         domain={domain || ""}
         clientId={clientId || ""}
+        onRedirectCallback={(appState) => {
+          const returnTo = (appState as any)?.returnTo as string | undefined;
+          router.replace(returnTo || "/dashboard");
+        }}
         authorizationParams={{
           redirect_uri:
             typeof window !== "undefined"
