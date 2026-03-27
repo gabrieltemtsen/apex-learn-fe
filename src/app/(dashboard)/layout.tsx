@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
-import { authApi } from "@/lib/api";
+import { useAuth0 } from "@auth0/auth0-react";
 import AuthGuard from "@/components/AuthGuard";
 import {
   LayoutDashboard, BookOpen, Compass, Trophy, Award,
@@ -29,12 +29,13 @@ const ADMIN_LINKS = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, logoutLocal } = useAuthStore();
+  const { logout } = useAuth0();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   async function handleLogout() {
-    try { await authApi.logout(); } catch { /* ignore */ }
-    logout();
+    logoutLocal();
+    await logout({ logoutParams: { returnTo: window.location.origin } });
     router.push("/");
   }
 

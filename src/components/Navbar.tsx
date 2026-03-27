@@ -6,7 +6,7 @@ import {
   Menu, X, BookOpen, ChevronDown, LogOut, User, LayoutDashboard
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
-import { authApi } from "@/lib/api";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const NAV_LINKS = [
   { href: "/courses", label: "Courses" },
@@ -18,7 +18,8 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logoutLocal } = useAuthStore();
+  const { logout } = useAuth0();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -34,11 +35,16 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    try { await authApi.logout(); } catch { /* ignore */ }
-    logout();
+    // Clear local UI state immediately; Auth0 will finish the session logout.
+    logoutLocal();
     setUserMenuOpen(false);
     setMobileOpen(false);
-    router.push("/");
+
+    try {
+      await logout({ logoutParams: { returnTo: window.location.origin } });
+    } finally {
+      router.push("/");
+    }
   };
 
   const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() : "?";
