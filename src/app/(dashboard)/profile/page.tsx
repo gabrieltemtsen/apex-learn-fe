@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Camera, Save, Loader2, CheckCircle, BookOpen, Trophy, Award, Flame, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
@@ -24,6 +24,19 @@ export default function ProfilePage() {
     bio: (user as any)?.bio ?? "",
     jobTitle: (user as any)?.jobTitle ?? "",
   });
+
+  // If user loads after first render, sync form once.
+  // (Auth0 profile fetch is async)
+  useEffect(() => {
+    if (!user) return;
+    setForm({
+      firstName: user.firstName ?? "",
+      lastName: user.lastName ?? "",
+      bio: (user as any)?.bio ?? "",
+      jobTitle: (user as any)?.jobTitle ?? "",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -32,10 +45,17 @@ export default function ProfilePage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    if (!user?.id) {
+      const msg = "Your profile is still loading. Please wait a moment and try again.";
+      setError(msg);
+      toastError(msg);
+      return;
+    }
+
     setSaving(true); setError(""); setSaved(false);
     try {
-      const { data } = await api.patch(`/users/${user?.id}`, form);
-      setUser({ ...user!, ...data });
+      const { data } = await api.patch(`/users/${user.id}`, form);
+      setUser({ ...user, ...data });
       setSaved(true);
       success("Profile updated successfully!");
       setTimeout(() => setSaved(false), 2500);
