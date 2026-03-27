@@ -49,7 +49,7 @@ function LoginInner() {
                   Redirecting…
                 </>
               ) : (
-                "Continue with Auth0"
+                "Sign in"
               )}
             </button>
 
@@ -64,7 +64,7 @@ function LoginInner() {
                 }
                 className="text-indigo-400 hover:text-indigo-300 font-semibold"
               >
-                Create account
+                Create an account
               </button>
             </p>
           </div>
