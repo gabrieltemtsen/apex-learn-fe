@@ -73,7 +73,7 @@ export default function DashboardPage() {
       {/* Greeting */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
-          {getGreeting()}, {user?.firstName ?? "Learner"}! 👋
+          {getGreeting()}{user?.firstName ? `, ${user.firstName}` : ""}
         </h1>
         <p className="text-slate-400 mt-1 text-sm">
           {isDemo ? "API not connected — showing demo data." : "Here's your learning overview today."}
