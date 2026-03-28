@@ -1,45 +1,53 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useAuthStore } from "@/store/auth.store";
+import { useAuth as useClerkAuth, useUser, useClerk } from "@clerk/nextjs";
 
 export function useAuth() {
   const router = useRouter();
-  const store = useAuthStore();
-  const { isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
+  const { isSignedIn, isLoaded, getToken } = useClerkAuth();
+  const { user } = useUser();
+  const { signOut } = useClerk();
 
   const requireAuth = () => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
-    }
+    if (isLoaded && !isSignedIn) router.push("/sign-in");
   };
 
   const requireRole = (roles: string[]) => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+    if (isLoaded && !isSignedIn) {
+      router.push("/sign-in");
       return false;
     }
-    if (!store.user || !roles.includes(store.user.role)) {
+
+    const role = user?.publicMetadata?.role as string | undefined;
+    if (!role || !roles.includes(role)) {
       router.push("/dashboard");
       return false;
     }
+
     return true;
   };
 
   const logoutApp = async () => {
-    store.logoutLocal();
-    await logout({ logoutParams: { returnTo: window.location.origin } });
+    await signOut();
     router.push("/");
   };
 
   return {
-    ...store,
-    isAuthenticated,
-    isLoading,
+    isAuthenticated: !!isSignedIn,
+    isLoading: !isLoaded,
+    user: user
+      ? {
+          id: user.id,
+          email: user.primaryEmailAddress?.emailAddress ?? "",
+          firstName: user.firstName ?? "",
+          lastName: user.lastName ?? "",
+          role: (user.publicMetadata?.role as string) ?? "learner",
+        }
+      : null,
     requireAuth,
     requireRole,
-    loginWithRedirect,
     logout: logoutApp,
+    getToken,
   };
 }

@@ -3,19 +3,19 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, Loader2 } from "lucide-react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from "@clerk/nextjs";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isSignedIn, isLoaded } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+    if (isLoaded && !isSignedIn) {
+      router.replace(`/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoaded, isSignedIn, router]);
 
-  if (isLoading || (!isLoading && !isAuthenticated)) {
+  if (!isLoaded || !isSignedIn) {
     return (
       <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center gap-4">
         <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center animate-pulse">
