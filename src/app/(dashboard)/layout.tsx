@@ -202,34 +202,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
 
         {/* ── Main content area ── */}
-        <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        <div className="flex-1 lg:ml-64 flex flex-col min-h-screen overflow-x-hidden">
           {/* Mobile top bar */}
-          <header className="lg:hidden sticky top-0 z-20 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+          <header className="lg:hidden sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between gap-3">
             <button
               onClick={() => setMobileOpen(true)}
-              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 shrink-0 transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
+            <Link href="/dashboard" className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
                 <BookOpen className="w-4 h-4 text-white" />
               </div>
-              <span className="text-white font-extrabold">
+              <span className="text-white font-extrabold truncate">
                 Apex<span className="text-indigo-400">Learn</span>™
               </span>
             </Link>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-sm font-bold">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-sm font-bold shrink-0 select-none">
               {initials}
             </div>
           </header>
 
-          {/* Page content */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full">{children}</main>
+          {/* Page content — extra bottom padding on mobile so bottom nav doesn't overlap */}
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full max-w-full pb-24 lg:pb-8 overflow-x-hidden">{children}</main>
         </div>
 
         {/* ── Mobile Bottom Nav ── */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 z-20 px-2 py-2">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-20 px-2 py-1.5">
           <div className="flex justify-around">
             {[
               { href: "/dashboard", icon: LayoutDashboard, label: "Home" },

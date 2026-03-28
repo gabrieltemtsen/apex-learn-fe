@@ -68,16 +68,41 @@ export default function ProfilePage() {
     jobTitle: "",
   });
 
-  // Sync form when profile loads
+  // Sync form when profile loads — prefer Clerk as source of truth for name
   useEffect(() => {
-    if (!dbUser) return;
+    if (!dbUser && !clerkUser) return;
+
+    const clerkFirst = clerkUser?.firstName ?? "";
+    const clerkLast = clerkUser?.lastName ?? "";
+
+    const backendFirst = dbUser?.firstName;
+    const backendLast = dbUser?.lastName;
+
+    // Use Clerk name if backend has no real name ("User" placeholder or empty)
+    const firstName =
+      backendFirst && backendFirst !== "User" ? backendFirst : clerkFirst || backendFirst || "";
+    const lastName =
+      backendLast && backendLast !== "" ? backendLast : clerkLast || backendLast || "";
+
     setForm({
-      firstName: dbUser.firstName ?? "",
-      lastName: dbUser.lastName ?? "",
-      bio: dbUser.bio ?? "",
-      jobTitle: dbUser.jobTitle ?? "",
+      firstName,
+      lastName,
+      bio: dbUser?.bio ?? "",
+      jobTitle: dbUser?.jobTitle ?? "",
     });
-  }, [dbUser?.id]);
+
+    // Auto-patch backend if it has stale/placeholder name from initial Clerk sync
+    if (
+      dbUser?.id &&
+      (backendFirst === "User" || !backendFirst || backendLast === "") &&
+      (clerkFirst || clerkLast)
+    ) {
+      api
+        .patch(`/users/${dbUser.id}`, { firstName: clerkFirst, lastName: clerkLast })
+        .catch(() => null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dbUser?.id, clerkUser?.id]);
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -121,7 +146,13 @@ export default function ProfilePage() {
     { label: "Day Streak", value: `${dbUser?.streak ?? 0}`, icon: Flame, color: "text-orange-400" },
   ];
 
-  const displayEmail = dbUser?.email || clerkUser?.primaryEmailAddress?.emailAddress || "";
+  // Always prefer real Clerk email over synthetic clerk.local address
+  const clerkEmail = clerkUser?.primaryEmailAddress?.emailAddress ?? "";
+  const displayEmail =
+    clerkEmail ||
+    (dbUser?.email && !dbUser.email.endsWith("@clerk.local") ? dbUser.email : "") ||
+    dbUser?.email ||
+    "";
   const displayRole = dbUser?.role || (clerkUser?.publicMetadata?.role as string | undefined) || "learner";
 
   return (
