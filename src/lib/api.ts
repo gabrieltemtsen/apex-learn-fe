@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { getAccessToken } from './auth0-token';
+
+let _getToken: (() => Promise<string | null>) | null = null;
+
+export function setClerkTokenProvider(fn: () => Promise<string | null>) {
+  _getToken = fn;
+}
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
@@ -7,22 +12,16 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  if (typeof window !== 'undefined') {
-    const token = await getAccessToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  if (typeof window !== 'undefined' && _getToken) {
+    const token = await _getToken().catch(() => null);
+    if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
 api.interceptors.response.use(
   (res) => res,
-  async (error) => {
-    // With Auth0, avoid hard-redirect loops.
-    // Let route guards handle navigation; consumers can handle 401s if needed.
-    return Promise.reject(error);
-  }
+  async (error) => Promise.reject(error)
 );
 
 export default api;

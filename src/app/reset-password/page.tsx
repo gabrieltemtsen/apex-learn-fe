@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 export default function ResetPasswordPage() {
@@ -8,10 +6,13 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md bg-slate-800/60 border border-slate-700 rounded-2xl p-6 sm:p-8 space-y-4">
         <h1 className="text-2xl font-extrabold text-white">Reset password</h1>
         <p className="text-slate-400 text-sm">
-          This app now uses Auth0 for authentication. Please use the password reset flow from the Auth0 login screen.
+          Password resets are handled by Clerk. Please use the “Forgot password?” flow on the sign-in screen.
         </p>
-        <Link href="/login" className="block w-full text-center py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold">
-          Go to Login
+        <Link
+          href="/sign-in"
+          className="block w-full text-center py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold"
+        >
+          Go to Sign In
         </Link>
       </div>
     </div>
